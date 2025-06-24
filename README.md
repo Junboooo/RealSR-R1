@@ -56,7 +56,7 @@ Real-World Image Super-Resolution is one of the most challenging task in image r
 
 ## Citation
 
-If LIPT helps your research or work, please consider citing the following works:
+If RealSR-R1 helps your research or work, please consider citing the following works:
 
 ----------
 ```BibTex
