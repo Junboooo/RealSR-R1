@@ -16,6 +16,13 @@
     <sup>1</sup>East China Normal University, <sup>2</sup>University of Science and Technology of China, <sup>3</sup>Huawei Noah’s Ark Lab, <br/>
 </div>
 
+  <a href="https://www.arxiv.org/abs/2506.16796">
+    <img
+      src="https://img.shields.io/badge/RealSR_R1-paper-red?logo=arxiv&logoColor=red"
+      alt="RealSR-R1 Paper on arXiv"
+    />
+   </a>
+
 ---
 
 > **Abstract:** 
@@ -45,3 +52,18 @@ Real-World Image Super-Resolution is one of the most challenging task in image r
   <img src="./figs/vis.png">
 </p>
 </details>
+
+
+## Citation
+
+If LIPT helps your research or work, please consider citing the following works:
+
+----------
+```BibTex
+@inproceedings{qiao2024RealSR-R1,
+  title={RealSR-R1: Reinforcement Learning for Real-World Image Super-Resolution with Vision-Language Chain-of-Thought},
+  author={Qiao, Junbo and Cai, Miaomiao and Li, Wei and Liu, Yutong and Huang, Xudong and He, Gaoqi and Xie, Jiao and Hu, Jie and Chen, Xinghao and Lin, Shaohui},
+  booktitle={arXiv preprint arXiv:2506.16796},
+  year={2025}
+}
+```
