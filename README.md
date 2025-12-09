@@ -4,16 +4,16 @@
     Junbo Qiao<sup>1,†</sup>&emsp;
     Miaomiao Cai<sup>2†</sup>&emsp;
     Wei Li<sup>3*</sup>&emsp;
-    Yutong Liu<sup>1,2</sup>&emsp;
     Xudong Huang<sup>3</sup>&emsp;
-    Gaoqi He<sup>1</sup>&emsp;
-    Jiao Xie<sup>1</sup>&emsp;
     Jie Hu<sup>3</sup>&emsp;
+    Xinghao Chen<sup>3</sup>&emsp;
     Shaohui Lin<sup>1*</sup>&emsp;
+    Hongkai Xiong<sup>1,4</sup>&emsp;
 </div>
 
+
 <div>
-    <sup>1</sup>East China Normal University, <sup>2</sup>University of Science and Technology of China, <sup>3</sup>Huawei Noah’s Ark Lab, <br/>
+    <sup>1</sup>East China Normal University, <sup>2</sup>University of Science and Technology of China, <sup>3</sup>Huawei Noah’s Ark Lab, <sup>4</sup>Shanghai Jiaotong University,<br/>
 </div>
 
   <a href="https://www.arxiv.org/abs/2506.16796">
@@ -30,10 +30,63 @@ Real-World Image Super-Resolution is one of the most challenging task in image r
 
 ![RealSR-R1](./figs/fig1.png)
 
-## ⚒️ TODO
+### Cold-start
+Please refer to [Lumina-mGPT](https://github.com/Alpha-VLLM/Lumina-mGPT) for data processing and training code.
 
-* [ ] Release code and pretrained models
--
+
+## 🛠️ Setup
+```
+git clone https://github.com/Junboooo/RealSR-R1.git
+conda create -n RealSR-R1 python=3.10
+conda activate RealSR-R1
+bash setup.sh
+```
+
+### RL Dataset
+Please refer to the script in ```./src/realsr-r1/src/open_r1/create_json.py``` for dataset preparation. 
+
+> 🔔 Our code is coming soon.
+ 
+### VLCOTGRPO
+After ready the dataset, you can start training using the following example bash script. Our bash scripts are in ```./src/scripts/example.py```
+```
+export DEBUG_MODE="true"
+export LOG_PATH="./debug_log_VLCOTGRPO.txt"
+
+export DATA_PATH=./src/realsr-r1/src/open_r1/500_v2
+export CKPT_PATH=./share_models/RealSR-R1/checkpoint
+export SAVE_PATH=./share_models/RealSR-R1
+
+export PYTHONPATH=$PYTHONPATH:./src/realsr-r1/src
+
+export CUDA_VISIBLE_DEVICES=0,1,2,3,4,6,7,8
+export CUDA_LAUNCH_BLOCKING=1
+torchrun --nproc_per_node="8" \
+    --nnodes="1" \
+    --node_rank="0" \
+    --master_addr="127.0.0.1" \
+    --master_port="11317" \
+    src/realsr-r1/src/open_r1/grpo.py \
+    --output_dir ${SAVE_PATH}  \
+    --model_name_or_path ${CKPT_PATH} \
+    --dataset_name ${DATA_PATH} \
+    --deepspeed ./src/realsr-r1/local_scripts/zero3.json \
+    --max_prompt_length 5000 \
+    --max_completion_length 7000 \
+    --per_device_train_batch_size 1 \
+    --gradient_accumulation_steps 1 \
+    --logging_steps 1 \
+    --bf16 \
+    --report_to wandb \
+    --gradient_checkpointing true \
+    --attn_implementation flash_attention_2 \
+    --max_pixels 401408 \
+    --num_train_epochs 2 \
+    --save_steps 100 \
+    --learning_rate=2e-06 \
+    --save_only_model true \
+    --num_generations 8 \
+```
 
 ## Results
 
@@ -67,3 +120,6 @@ If RealSR-R1 helps your research or work, please consider citing the following w
   year={2025}
 }
 ```
+
+## Acknowledgement
+We sincerely thank projects <a href="https://github.com/Liuziyu77/Visual-RFT">Visual-RFT</a> and <a href="https://github.com/Alpha-VLLM/Lumina-mGPT">Lumina-mGPT</a> for providing their open-source resources.
