@@ -9,7 +9,7 @@ export DATA_PATH=/work/docker/GRPO/grpo-lumina/src/virft/src/open_r1/test500_v2
 export CKPT_PATH=/work/docker/GRPO/grpo-lumina/share_models/RealSR-R1_lr5e6/checkpoint-30 #/work/docker/GRPO/PURE-main/pure/ckpts/Alpha-VLLM/PRUE #/work//docker/GRPO/grpo-lumina/Qwen2-VL-2B-Instruct # 
 export SAVE_PATH=./share_models/RealSR-R1_lr2e6
 
-export PYTHONPATH=$PYTHONPATH:/work//docker/GRPO/grpo-lumina/src/virft/src
+export PYTHONPATH=$PYTHONPATH:/work//docker/GRPO/grpo-lumina/src/realsr-r1/src
  #8192
 export CUDA_VISIBLE_DEVICES=0,1,2,3,4,6
 export CUDA_LAUNCH_BLOCKING=1
