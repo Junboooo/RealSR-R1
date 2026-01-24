@@ -120,4 +120,4 @@ If RealSR-R1 helps your research or work, please consider citing the following w
 ```
 
 ## Acknowledgement
-We sincerely thank projects <a href="https://github.com/Liuziyu77/Visual-RFT">Visual-RFT</a>,  <a href="[https://github.com/Liuziyu77/Visual-RFT](https://github.com/nonwhy/PURE/)">PURE</a> and <a href="https://github.com/Alpha-VLLM/Lumina-mGPT">Lumina-mGPT</a> for providing their open-source resources.
+We sincerely thank projects <a href="https://github.com/Liuziyu77/Visual-RFT">Visual-RFT</a>,  <a href="https://github.com/nonwhy/PURE/">PURE</a> and <a href="https://github.com/Alpha-VLLM/Lumina-mGPT">Lumina-mGPT</a> for providing their open-source resources.
