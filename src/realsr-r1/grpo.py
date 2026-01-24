@@ -437,53 +437,7 @@ def main(script_args, training_args, model_args):
     from datasets import DatasetDict
     # dataset = DatasetDict.load_from_disk(script_args.dataset_name)
     dataset = load_dataset(script_args.dataset_name, name=script_args.dataset_config)
-#########################################################初步读取数据构建数据集
-    # import os
-    # from datasets import Dataset, DatasetDict
-    # from PIL import Image
-    # from concurrent.futures import ThreadPoolExecutor
-
-    # image_folder = "/work/docker/GRPO/training_for_ar_LSFF/small/lr"
-    # text_folder = "/work/docker/GRPO/training_for_ar_LSFF/small/tag"
-
-    # image_files = sorted(os.listdir(image_folder)) 
-    # text_files = sorted(os.listdir(text_folder))
-
-
-    # def load_image_and_text(image_file, text_file):
-    #     image_path = os.path.join(image_folder, image_file)
-    #     text_path = os.path.join(text_folder, text_file)
-
-
-    #     image = Image.open(image_path).convert("RGB")
-    #     with open(text_path, 'r', encoding='utf-8') as f:
-    #         text = f.read().strip()
-        
-    #     return {
-    #         "image": image,
-    #         "text": text
-    #     }
-    # def parallel_load_data(image_files, text_files, num_workers=1):
-    #     with ThreadPoolExecutor(max_workers=num_workers) as executor:
-    #         data = list(executor.map(load_image_and_text, image_files, text_files))
-    #     return data
     
-
-
-    # data = parallel_load_data(image_files, text_files)
-
-    # dataset = Dataset.from_list(data)
-    # print(dataset)
-
-###############################################################构建对话
-    # Format into conversation
-    # def make_conversation(example):
-    #     return {
-    #         "prompt": [
-    #             {"role": "system", "content": SYSTEM_PROMPT},
-    #             {"role": "user", "content": example["problem"]},
-    #         ],
-    #     }
     def make_conversation(example):
         q1 = "Perceive the degradation, understand the image content, and restore the high-quality image step by step (simulating the image restoration process from coarse to fine). The low-quality image is as follows: <|image|>. The generation format should be as follows: <degradation> ... </degradation> <rough_understand> ... </rough_understand> <rough_image> ... </rough_image> <middle_understand> ... </middle_understand> <middle_image> ... </middle_image> <final_understand> ... </final_understand> <final_image> ... </final_image>"
         qas = [[q1, None]]
@@ -512,7 +466,7 @@ def main(script_args, training_args, model_args):
         return item
 
     from datasets import DatasetDict
-    dataset = DatasetDict.load_from_disk('/work/docker/GRPO/grpo-lumina/src/virft/src/open_r1/test500_v2')
+    dataset = DatasetDict.load_from_disk('test500_v2')
     dataset = dataset.map(make_conversation)
     
     trainer_cls = Qwen2VLGRPOTrainer if not training_args.use_vllm else Qwen2VLGRPOVLLMTrainer
