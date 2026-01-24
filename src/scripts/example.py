@@ -5,11 +5,11 @@ export LOG_PATH="./debug_log_2b_GRPO_coco_base65cate_6k.txt"
 # export LD_LIBRARY_PATH=/usr/local/cuda-12.1/compat:$LD_LIBRARY_PATH
 # export CUDA_HOME=/usr/local/cuda
 
-export DATA_PATH=/work/docker/GRPO/src/realsr-r1/src/open_r1/test500_v2
+export DATA_PATH=/work/docker/GRPO/src/realsr-r1/test500_v2
 export CKPT_PATH=/work/docker/GRPO/share_models/RealSR-R1_lr5e6/checkpoint-30 
 export SAVE_PATH=./share_models/RealSR-R1_lr2e6
 
-export PYTHONPATH=$PYTHONPATH:/work/docker/GRPO/src/realsr-r1/src
+export PYTHONPATH=$PYTHONPATH:/work/docker/GRPO/src/realsr-r1
  #8192
 export CUDA_VISIBLE_DEVICES=0,1,2,3,4,6
 export CUDA_LAUNCH_BLOCKING=1
