@@ -5,7 +5,7 @@ from accelerate import init_empty_weights
 import torch
 
 # import sys
-# sys.path.insert(0, '/root/wx1233510/PURE-main/PURE-main')
+# sys.path.insert(0, '/PURE-main/PURE-main')
 from model import ChameleonXLLMXConfig, ChameleonXLLMXForConditionalGeneration
 from xllmx.data.item_processor import ItemProcessorBase
 from xllmx.solvers.finetune import FinetuneSolverBase
@@ -89,7 +89,7 @@ class Solver(FinetuneSolverBase):
     def _make_and_save_starting_point(self, save_path: str) -> None:
 
         pretrained_name = {
-            "7B": "/root/wx1233510/PURE-main/PURE-main/pure/ckpts/Alpha-VLLM/PRUE",
+            "7B": "/PURE-main/PURE-main/pure/ckpts/Alpha-VLLM/PRUE",
             "34B": "Alpha-VLLM/Chameleon_34B_mGPT",
         }[self.args.model_size]
 
