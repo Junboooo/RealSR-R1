@@ -44,8 +44,6 @@ bash setup.sh
 
 ### RL Dataset
 Please refer to the script in ```./src/realsr-r1/src/open_r1/create_json.py``` for dataset preparation. 
-
-> 🔔 Our code is coming soon.
  
 ### VLCOTGRPO
 After ready the dataset, you can start training using the following example bash script. Our bash scripts are in ```./src/scripts/example.py```
@@ -122,4 +120,4 @@ If RealSR-R1 helps your research or work, please consider citing the following w
 ```
 
 ## Acknowledgement
-We sincerely thank projects <a href="https://github.com/Liuziyu77/Visual-RFT">Visual-RFT</a> and <a href="https://github.com/Alpha-VLLM/Lumina-mGPT">Lumina-mGPT</a> for providing their open-source resources.
+We sincerely thank projects <a href="https://github.com/Liuziyu77/Visual-RFT">Visual-RFT</a>,  <a href="[https://github.com/Liuziyu77/Visual-RFT](https://github.com/nonwhy/PURE/)">PURE</a> and <a href="https://github.com/Alpha-VLLM/Lumina-mGPT">Lumina-mGPT</a> for providing their open-source resources.
