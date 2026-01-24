@@ -64,53 +64,10 @@ from sklearn.preprocessing import MinMaxScaler
 if is_wandb_available():
     import wandb
 import numpy as np
-# What we call a reward function is a callable that takes a list of prompts and completions and returns a list of
-# rewards. When it's a string, it's a model ID, so it's loaded as a pretrained model.
+
 RewardFunc = Union[str, PreTrainedModel, Callable[[list, list], list[float]]]
 
-# def iqa_reward(completions, TOPIQ,MUSIQ,MANIQA,CLIPIQA):
-#     import pdb;pdb.set_trace()
-#     topiq_value=[]
-#     musiq_value=[]
-#     maniqa_value=[]
-#     clipiqa_value=[]
-#     transform = transforms.Compose([transforms.ToTensor()])
-#     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-#     # 计算 MUSIQ 分数  
-#     for i in range(len(completions)):
-#         sr_img=completions[i][1][-1]
-#         sr_img = transform(sr_img).unsqueeze(0).to(device)
-#         # TOPIQ=pyiqa.create_metric('topiq_nr', device=device)
-#         # CLIPIQA=pyiqa.create_metric('clipiqa', device=device)
-#         # MUSIQ=pyiqa.create_metric('musiq', device=device)
-#         # MANIQA=pyiqa.create_metric('maniqa-pipal', device=device)
 
-#         with torch.no_grad():
-#             topiq_value.append(TOPIQ(sr_img ).item())
-#             musiq_value.append(MUSIQ(sr_img ).item())   
-#             maniqa_value.append(MANIQA(sr_img ).item())
-#             clipiqa_value.append(CLIPIQA(sr_img ).item())
-#     # 将值转为 numpy 数组以便处理
-#     topiq_value = np.array(topiq_value).reshape(-1, 1)
-#     musiq_value = np.array(musiq_value).reshape(-1, 1)
-#     maniqa_value = np.array(maniqa_value).reshape(-1, 1)
-#     clipiqa_value = np.array(clipiqa_value).reshape(-1, 1)
-
-#     # 使用 MinMaxScaler 对三个指标的值进行归一化
-#     scaler = MinMaxScaler()
-
-#     # 对每个值进行归一化
-#     topiq_normalized = scaler.fit_transform(topiq_value)
-#     musiq_normalized = scaler.fit_transform(musiq_value)
-#     maniqa_normalized = scaler.fit_transform(maniqa_value)
-#     clipiqa_normalized = scaler.fit_transform(clipiqa_value)
-
-#     # 逐个位置相加，并计算每个位置的平均值
-#     # import pdb;pdb.set_trace()
-#     summed_values = topiq_normalized + musiq_normalized + maniqa_normalized +clipiqa_normalized
-#     average_values = np.mean(summed_values, axis=1)
-
-#     return  average_values
 
 def iqa_reward(completions, TOPIQ,MUSIQ,MANIQA,CLIPIQA):
     # import pdb;pdb.set_trace()
@@ -134,23 +91,20 @@ def iqa_reward(completions, TOPIQ,MUSIQ,MANIQA,CLIPIQA):
             musiq_value.append((MUSIQ(sr_img).item())/100)   
             maniqa_value.append(MANIQA(sr_img).item())
             clipiqa_value.append(CLIPIQA(sr_img).item())
-    # 将值转为 numpy 数组以便处理
+
     topiq_value = np.array(topiq_value)
     musiq_value = np.array(musiq_value)
     maniqa_value = np.array(maniqa_value)
     clipiqa_value = np.array(clipiqa_value)
 
-    # 使用 MinMaxScaler 对三个指标的值进行归一化
     # scaler = MinMaxScaler()
 
-    # 对每个值进行归一化
+
     # topiq_normalized = scaler.fit_transform(topiq_value)
     # musiq_normalized = scaler.fit_transform(musiq_value)
     # maniqa_normalized = scaler.fit_transform(maniqa_value)
     # clipiqa_normalized = scaler.fit_transform(clipiqa_value)
 
-    # 逐个位置相加，并计算每个位置的平均值
-    # import pdb;pdb.set_trace()
     summed_values = topiq_value + musiq_value + maniqa_value +clipiqa_value
     average_values = summed_values/ 4
 
@@ -318,28 +272,6 @@ class Qwen2VLGRPOTrainer(Trainer):
             precision="bf16",
             target_size=512,)
         
-        ######################################
-        # Reference model lzy modified
-        # if peft_config is None:
-        #     if is_deepspeed_zero3_enabled():
-        #         if "Qwen2-VL" in model_id:
-        #             self.ref_model = Qwen2VLForConditionalGeneration.from_pretrained(model_id, **model_init_kwargs)
-        #         elif "Qwen2.5-VL" in model_id:
-        #             self.ref_model = Qwen2_5_VLForConditionalGeneration.from_pretrained(model_id, **model_init_kwargs)
-        #         elif "PURE" in model_id:
-        #             self.ref_model = ChameleonForConditionalGeneration.from_pretrained(model_id, **model_init_kwargs)
-        #         elif "Aria" in model_id:
-        #             self.ref_model = AriaForConditionalGeneration.from_pretrained(model_id, **model_init_kwargs)
-        #         else:
-        #             self.ref_model = AutoModelForCausalLM.from_pretrained(model_id, **model_init_kwargs)
-        #     else:
-        #         # If PEFT configuration is not provided, create a reference model based on the initial model.
-        #         self.ref_model = create_reference_model(model)
-        # else:
-        #     # If PEFT is used, the reference model is not needed since the adapter can be disabled
-        #     # to revert to the initial model.
-        #     self.ref_model = None
-        ######################################
         # Processing class
         if processing_class is None:
             if "Qwen2-VL" in model_id or "Qwen2.5-VL" in model_id or "Aria" in model_id:
@@ -396,13 +328,6 @@ class Qwen2VLGRPOTrainer(Trainer):
         self.num_generations = args.num_generations  # = G in the GRPO paper
 
         
-        # self.generation_config = GenerationConfig(
-        #     max_new_tokens=self.max_completion_length,
-        #     do_sample=True,  
-        #     temperature=1, # HACK
-        #     num_return_sequences=self.num_generations,
-        #     pad_token_id=pad_token_id,
-        # )
         self.generation_config = GenerationConfig(
             max_new_tokens=self.max_completion_length,
             max_length=self.inference_solver.model.config.max_position_embeddings,
@@ -444,17 +369,6 @@ class Qwen2VLGRPOTrainer(Trainer):
         # self.model_accepts_loss_kwargs to False to enable scaling.
         self.model_accepts_loss_kwargs = False
 
-        ######################################
-        # if self.ref_model is not None:
-        #     if self.is_deepspeed_enabled:
-        #         self.ref_model = prepare_deepspeed(self.ref_model, self.accelerator)
-        #     else:
-        #         self.ref_model = self.accelerator.prepare_model(self.ref_model, evaluation_mode=True)
-        # #verl
-        # for i, reward_func in enumerate(self.reward_funcs):
-        #     if isinstance(reward_func, PreTrainedModel):
-        #         self.reward_funcs[i] = self.accelerator.prepare_model(reward_func, evaluation_mode=True)
-        ######################################
     def _set_signature_columns_if_needed(self):
         # If `self.args.remove_unused_columns` is True, non-signature columns are removed.
         # By default, this method sets `self._signature_columns` to the model's expected inputs.
@@ -488,7 +402,6 @@ class Qwen2VLGRPOTrainer(Trainer):
         if return_outputs:
             raise ValueError("The GRPOTrainer does not support returning outputs")
     
-        ######################################################处理输入
         tags = [x["tag"] for x in inputs]
         images = [x["image"] for x in inputs]
         conversations = [x["conversations"] for x in inputs]
@@ -512,67 +425,43 @@ class Qwen2VLGRPOTrainer(Trainer):
         # Generate completions
         with unwrap_model_for_generation(model, self.accelerator) as unwrapped_model:
             prompt_completion_ids = unwrapped_model.generate(prompt_ids, generation_config=self.generation_config, logits_processor=logits_processor, streamer=None, use_cache=True)
-            # prompt_completion_ids = unwrapped_model.generate(**prompt_inputs, generation_config=self.generation_config) ###len=8 生成八次 # 生成提示补全ID
-            prompt_length = prompt_ids.size(1) # 获取提示长度
-            prompt_ids = prompt_completion_ids[:, :prompt_length] # 提取提示ID
-            completion_ids = prompt_completion_ids[:, prompt_length:] # 提取补全ID
+            # prompt_completion_ids = unwrapped_model.generate(**prompt_inputs, generation_config=self.generation_config)
+            prompt_length = prompt_ids.size(1) 
+            prompt_ids = prompt_completion_ids[:, :prompt_length] 
+            completion_ids = prompt_completion_ids[:, prompt_length:]
 
-            # prompt_mask = prompt_mask.repeat_interleave(self.num_generations, dim=0) ##############################mask去掉了
+            # prompt_mask = prompt_mask.repeat_interleave(self.num_generations, dim=0)
         
 
-        # # import pdb;pdb.set_trace()
-        # # Mask everything after the first EOS token
-        # # import pdb;pdb.set_trace()
-        is_eos = completion_ids == 8710 #self.inference_solver.item_processor.process_item.tokenizer.eos_token_id # 在第一个EOS标记后屏蔽所有内容
+        is_eos = completion_ids == 8710 #self.inference_solver.item_processor.process_item.tokenizer.eos_token_id
         device = self.accelerator.device 
-        eos_idx = torch.full((is_eos.size(0),), is_eos.size(1), dtype=torch.long, device=device) # 初始化EOS索引
-        eos_idx[is_eos.any(dim=1)] = is_eos.int().argmax(dim=1)[is_eos.any(dim=1)] # 更新EOS索引 
-        sequence_indices = torch.arange(is_eos.size(1), device=device).expand(is_eos.size(0), -1) # 生成序列索引
-        # import pdb;pdb.set_trace()
-        prompt_mask = torch.ones_like(prompt_ids)
-        completion_mask = (sequence_indices <= eos_idx.unsqueeze(1)).int() # 生成补全掩码,补全到256，补全的为0，生成的为1
+        eos_idx = torch.full((is_eos.size(0),), is_eos.size(1), dtype=torch.long, device=device) 
+        eos_idx[is_eos.any(dim=1)] = is_eos.int().argmax(dim=1)[is_eos.any(dim=1)] 
+        sequence_indices = torch.arange(is_eos.size(1), device=device).expand(is_eos.size(0), -1)
 
-        # # # 将提示掩码与补全掩码连接以进行logit计算
-        attention_mask = torch.cat([prompt_mask, completion_mask], dim=1)  # (B*G, P+C) ##############################mask去掉了
+        prompt_mask = torch.ones_like(prompt_ids)
+        completion_mask = (sequence_indices <= eos_idx.unsqueeze(1)).int() 
+
+        attention_mask = torch.cat([prompt_mask, completion_mask], dim=1)  # (B*G, P+C)
 
 
         
 
 
-        ######################################
-        # #计算model的输入结果
+
         per_token_logps = self._get_per_token_logps(model, prompt_completion_ids, attention_mask)
         # Get rid of the prompt (-1 because of the shift done in get_per_token_logps)
         per_token_logps = per_token_logps[:, prompt_length - 1 :] #8*256 计算输出结果的概率
 
-        # with torch.inference_mode():
-        #     if self.ref_model is not None:
-        #         ref_per_token_logps = self._get_per_token_logps(self.ref_model, prompt_completion_ids, attention_mask=attention_mask) # 获取参考模型的每个token的log概率
-        #     else:
-        #         with self.accelerator.unwrap_model(model).disable_adapter():
-        #             ref_per_token_logps = self._get_per_token_logps(model, prompt_completion_ids, attention_mask=attention_mask) # 获取模型的每个token的log概率  #8*900
-        # ref_per_token_logps = ref_per_token_logps[:, prompt_length - 1 :] #8*256 计算输出结果的概率
-        ######################################
-        # # 计算模型和参考模型之间的KL散度
-        # per_token_kl = torch.exp(ref_per_token_logps - per_token_logps) - (ref_per_token_logps - per_token_logps) - 1
 
 
         completion_ids = completion_ids.tolist()
-        # import pickle
-        # # with open('/work/docker/GRPO/grpo-lumina/src/virft/src/open_r1/trainer/completion_ids.pkl', 'wb') as f: 
-        # #     pickle.dump(completion_ids, f)
-        # with open('/work/docker/GRPO/grpo-lumina/src/virft/src/open_r1/trainer/completion_ids.pkl', 'rb') as f:
-        #     completion_ids = pickle.load(f)
-        # # completion_ids = [completion_ids[0][:-1],completion_ids[1][:-1]]
-        # print("############save##################")
-        # import pdb;pdb.set_trace()
         completions = []
 
 
         for index, tokens in enumerate(completion_ids):  # Add index to differentiate folders
             generated, generated_images = self.inference_solver.decode_ids(tokens)
             completions.append((generated, generated_images))
-            ###################################################
             # if self.state.global_step % 1 == 0 and self.accelerator.is_main_process:
             if self.accelerator.is_main_process:
                 # Create a unique directory for each tokens based on the index
@@ -589,61 +478,45 @@ class Qwen2VLGRPOTrainer(Trainer):
                 text_path = os.path.join(step_dir, text_filename)
                 with open(text_path, 'w') as text_file:
                     text_file.write(generated)  # Save the text
-            ##################################
-        # with open('/work/docker/GRPO/grpo-lumina/src/virft/src/open_r1/trainer/completions_de.pkl', 'wb') as f: 
-        #     pickle.dump(completions, f)
-        # with open('/work/docker/GRPO/grpo-lumina/src/virft/src/open_r1/trainer/completions_de.pkl', 'rb') as f:
-        #     completions = pickle.load(f)
-        # import pdb;pdb.set_trace()
-        # Compute the rewards
-        
-        ##############################################
         prompts = [prompt for prompt in prompts for _ in range(self.num_generations)]
 
-        rewards_per_func = torch.zeros(len(prompts), len(self.reward_funcs)+1, device=device) # 初始化每个函数的奖励
+        rewards_per_func = torch.zeros(len(prompts), len(self.reward_funcs)+1, device=device) 
         for i, (reward_func, reward_processing_class) in enumerate(
             zip(self.reward_funcs, self.reward_processing_classes)
         ):
-            # 模块而不是预训练模型以兼容编译模型
+
             if isinstance(reward_func, PreTrainedModel):
                 print('nan')
             else:
-                 # 重复所有输入列（但“prompt”和“completion”除外）以匹配生成的数量
                 reward_kwargs = {key: [] for key in inputs[0].keys() if key not in ["prompt", "completion"]}
-                for key in reward_kwargs: # 获取输入键 
+                for key in reward_kwargs:
                     for example in inputs:
                         # Repeat each value in the column for `num_generations` times
-                        reward_kwargs[key].extend([example[key]] * self.num_generations) # 这里是把gt复制8份和预测的维度统一
-                output_reward_func = reward_func(prompts=prompts, completions=completions, **reward_kwargs) # 调用奖励函数 维度是8
-                rewards_per_func[:, i] = torch.tensor(output_reward_func, dtype=torch.float32, device=device)# 转换奖励为张量
+                        reward_kwargs[key].extend([example[key]] * self.num_generations)
+                output_reward_func = reward_func(prompts=prompts, completions=completions, **reward_kwargs) 
+                rewards_per_func[:, i] = torch.tensor(output_reward_func, dtype=torch.float32, device=device)
         
-        # import pdb;pdb.set_trace()
         iqa_val=iqa_reward(completions, self.TOPIQ,self.MUSIQ,self.MANIQA,self.CLIPIQA)
         rewards_per_func[:, -1]=torch.tensor(iqa_val, dtype=torch.float32, device=device)
-        # # 收集每个函数的奖励：这部分很关键，因为奖励是按组归一化的，补全可能分布在多个进程中
-        # rewards = gather(rewards_per_func)  是将 rewards_per_func 张量从所有设备（如多个 GPU）收集到主设备（通常是第一个 GPU 或 CPU）
-        # rewards = (rewards_per_func * self.reward_weights.to(device).unsqueeze(0)).sum(dim=1)  # 计算总奖励
         rewards = rewards_per_func.sum(dim=1)
 
         # Compute grouped-wise rewards
-        mean_grouped_rewards = rewards.view(-1, self.num_generations).mean(dim=1)  #平均
-        std_grouped_rewards = rewards.view(-1, self.num_generations).std(dim=1) #标准差
+        mean_grouped_rewards = rewards.view(-1, self.num_generations).mean(dim=1) 
+        std_grouped_rewards = rewards.view(-1, self.num_generations).std(dim=1)
 
         # Normalize the rewards to compute the advantages
         mean_grouped_rewards = mean_grouped_rewards.repeat_interleave(self.num_generations, dim=0)
         std_grouped_rewards = std_grouped_rewards.repeat_interleave(self.num_generations, dim=0)
         advantages = (rewards - mean_grouped_rewards) / (std_grouped_rewards + 1e-4)
 
-        # x - x.detach() allows for preserving gradients from x
         per_token_loss = torch.exp(per_token_logps - per_token_logps.detach()) * advantages.unsqueeze(1)
-        # per_token_loss = -(per_token_loss - self.beta * per_token_kl)
-        per_token_loss = -(per_token_loss) #################
+        per_token_loss = -(per_token_loss) 
         loss = ((per_token_loss * completion_mask).sum(dim=1) / completion_mask.sum(dim=1)).mean()
 
 
         # Log the metrics
-        completion_length = self.accelerator.gather_for_metrics(completion_mask.sum(1)).float().mean().item() # 记录指标，计算补全长度
-        self._metrics["completion_length"].append(completion_length) # 记录补全长度
+        completion_length = self.accelerator.gather_for_metrics(completion_mask.sum(1)).float().mean().item()
+        self._metrics["completion_length"].append(completion_length)
 
         reward_per_func = self.accelerator.gather_for_metrics(rewards_per_func).mean(0)
         for i, reward_func in enumerate(self.reward_funcs):
@@ -652,16 +525,12 @@ class Qwen2VLGRPOTrainer(Trainer):
             else:
                 reward_func_name = reward_func.__name__
             self._metrics[f"rewards/{reward_func_name}"].append(reward_per_func[i].item())
-        # self._metrics[f"rewards/iqa"].append(iqa_val.item())
 
         self._metrics["reward"].append(self.accelerator.gather_for_metrics(rewards).mean().item())
 
         self._metrics["reward_std"].append(self.accelerator.gather_for_metrics(std_grouped_rewards).mean().item())
 
-        # mean_kl = ((per_token_kl * completion_mask).sum(dim=1) / completion_mask.sum(dim=1)).mean()
-        # self._metrics["kl"].append(self.accelerator.gather_for_metrics(mean_kl).mean().item())
 
-        # 保存日志到文件###################################################
         if self.accelerator.is_main_process:
             log_file_path = os.path.join(self.args.output_dir, 'training_log.txt')
             with open(log_file_path, 'a') as f:
@@ -671,9 +540,8 @@ class Qwen2VLGRPOTrainer(Trainer):
                 f.write(f"format: {rewards_per_func[1]}")
                 f.write(f"reward: {rewards}")
                 # for key, value in self._metrics.items():
-                #     f.write(f"{key}: {value[-1]} ")  # 只保存当前训练步骤的最新值
+                #     f.write(f"{key}: {value[-1]} ")
                 f.write("\n") 
-        ######################################################################################################
         return loss
 
     def log(self, logs: dict[str, float], start_time: Optional[float] = None) -> None:
