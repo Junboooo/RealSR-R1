@@ -43,7 +43,7 @@ bash setup.sh
 ```
 
 ### RL Dataset
-Please refer to the script in ```./src/realsr-r1/src/open_r1/create_json.py``` for dataset preparation. 
+Please refer to the script in ```./src/realsr-r1/create_json.py``` for dataset preparation. 
  
 ### VLCOTGRPO
 After ready the dataset, you can start training using the following example bash script. Our bash scripts are in ```./src/scripts/example.py```
