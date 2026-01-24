@@ -49,17 +49,21 @@ Please refer to the script in ```./src/realsr-r1/src/open_r1/create_json.py``` f
 After ready the dataset, you can start training using the following example bash script. Our bash scripts are in ```./src/scripts/example.py```
 ```
 export DEBUG_MODE="true"
-export LOG_PATH="./debug_log_VLCOTGRPO.txt"
+export LOG_PATH="./debug_log_2b_GRPO_coco_base65cate_6k.txt"
 
-export DATA_PATH=./src/realsr-r1/src/open_r1/500_v2
-export CKPT_PATH=./share_models/RealSR-R1/checkpoint
-export SAVE_PATH=./share_models/RealSR-R1
+# export LD_LIBRARY_PATH=/opt/conda/envs/grpo/lib/python3.10/site-packages/nvidia/nvjitlink/lib:$LD_LIBRARY_PATH
+# export LD_LIBRARY_PATH=/usr/local/cuda-12.1/compat:$LD_LIBRARY_PATH
+# export CUDA_HOME=/usr/local/cuda
 
-export PYTHONPATH=$PYTHONPATH:./src/realsr-r1/src
+export DATA_PATH=/work/docker/GRPO/src/realsr-r1/test500_v2
+export CKPT_PATH=/work/docker/GRPO/share_models/RealSR-R1_lr5e6/checkpoint-30 
+export SAVE_PATH=./share_models/RealSR-R1_lr2e6
 
-export CUDA_VISIBLE_DEVICES=0,1,2,3,4,6,7,8
+export PYTHONPATH=$PYTHONPATH:/work/docker/GRPO/src/realsr-r1
+ #8192
+export CUDA_VISIBLE_DEVICES=0,1,2,3,4,6
 export CUDA_LAUNCH_BLOCKING=1
-torchrun --nproc_per_node="8" \
+torchrun --nproc_per_node="6" \
     --nnodes="1" \
     --node_rank="0" \
     --master_addr="127.0.0.1" \
@@ -68,7 +72,7 @@ torchrun --nproc_per_node="8" \
     --output_dir ${SAVE_PATH}  \
     --model_name_or_path ${CKPT_PATH} \
     --dataset_name ${DATA_PATH} \
-    --deepspeed ./src/realsr-r1/local_scripts/zero3.json \
+    --deepspeed /work/docker/GRPO/src/realsr-r1/local_scripts/zero3.json \
     --max_prompt_length 5000 \
     --max_completion_length 7000 \
     --per_device_train_batch_size 1 \
@@ -80,10 +84,10 @@ torchrun --nproc_per_node="8" \
     --attn_implementation flash_attention_2 \
     --max_pixels 401408 \
     --num_train_epochs 2 \
-    --save_steps 100 \
+    --save_steps 1 \
     --learning_rate=2e-06 \
     --save_only_model true \
-    --num_generations 8 \
+    --num_generations 5 \
 ```
 
 ## Results
